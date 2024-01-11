@@ -138,6 +138,9 @@ def optimizeModel():
     # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
     # columns of actions taken. These are the actions which would've been taken
     # for each batch state according to policyNet
+    #
+    # This call just gives our policyNet the states we sampled, then takes the responses
+    # (our guess at the best action) and puts them into a tensor
     stateActionValues = policyNet(stateBatch).gather(1, actionBatch)
 
     # Compute V(s_{t+1}) for all next states.
@@ -145,6 +148,10 @@ def optimizeModel():
     # on the "older" targetNet; selecting their best reward with max(1).values
     # This is merged based on the mask, such that we'll have either the expected
     # state value or 0 in case the state was final.
+    #
+    # This section computes our best guess at the value of a state using the targetNet, i.e.
+    # the network we have not yet updated. We end up with a tensor containing either
+    # a) our best guess of the value of a state, or b) 0 if the state was final
     nextStateValues = torch.zeros(BATCH_SIZE, device=device)
     with torch.no_grad():
         nextStateValues[nonfinalMask] = targetNet(nonfinalNextStates).max(1).values
