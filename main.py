@@ -70,7 +70,7 @@ numActions = env.action_space.n
 state, info = env.reset()
 numObservations = len(state)
 
-# Create a policy network (to learn the policy) and a target network (to... TDB)
+# Create a policy network (to learn the policy) and a target network (to calculate our best guess at a states value without the new updates to our network)
 # Put these networks on the GPU (if available) to improve training times
 
 policyNet = DQN(numObservations, numActions).to(device)
