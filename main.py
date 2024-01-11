@@ -26,6 +26,10 @@ LR = 1e-4
 numActions = env.action_space.n
 state, info = env.reset()
 numObservations = len(state)
+policyNet = DQN(numObservations, numActions).to(device)
+targetNet = DQN(numObservations, numActions).to(device)
+targetNet.load_state_dict(policyNet.state_dict())
+
     else:
 
 X = torch.rand(10, device=device)
