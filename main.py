@@ -82,7 +82,12 @@ optimizer = optim.AdamW(policyNet.parameters(), lr=LR, amsgrad=True)
 
 # Create the memory for remembering and sampling transitions of the environment
 memory = ReplayMemory(10000)
+
+# Remember the number of steps completed.
+# This is an icky global variable, and I would LOVE to refactor this out, but let"s see where the tutorial takes us...
 steps = 0
+
+# A list of episode durations so we can know how long each episode lasted.
 episodeDurations = []
 
 
