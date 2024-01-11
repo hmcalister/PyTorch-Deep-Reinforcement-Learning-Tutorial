@@ -69,12 +69,18 @@ numActions = env.action_space.n
 # The state and information of the environment as we start
 state, info = env.reset()
 numObservations = len(state)
+
+# Create a policy network (to learn the policy) and a target network (to... TDB)
+# Put these networks on the GPU (if available) to improve training times
+
 policyNet = DQN(numObservations, numActions).to(device)
 targetNet = DQN(numObservations, numActions).to(device)
 targetNet.load_state_dict(policyNet.state_dict())
 
+# Create an optimizer (for optimizing the networks, duh)
 optimizer = optim.AdamW(policyNet.parameters(), lr=LR, amsgrad=True)
 
+# Create the memory for remembering and sampling transitions of the environment
 memory = ReplayMemory(10000)
 steps = 0
 episodeDurations = []
