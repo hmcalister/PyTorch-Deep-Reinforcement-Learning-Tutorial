@@ -104,3 +104,9 @@ def optimizeModel():
     torch.nn.utils.clip_grad_value_(policyNet.parameters(), 100)
     optimizer.step()
 
+# Ensure the number of episodes is reasonable for the device we are using
+if torch.cuda.is_available():
+    numEpisodes = 600
+else:
+    numEpisodes = 50
+
