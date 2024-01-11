@@ -110,3 +110,43 @@ if torch.cuda.is_available():
 else:
     numEpisodes = 50
 
+for episodeIndex in range(numEpisodes):
+    # Initialize the environment and get its state
+    state, info = env.reset()
+    state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
+    for t in count():
+        action = selectAction(state)
+        observation, reward, terminated, truncated, _ = env.step(action.item())
+        reward = torch.tensor([reward], device=device)
+        done = terminated or truncated
+
+        if terminated:
+            nextState = None
+        else:
+            nextState = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
+
+        # Store the transition in memory
+        memory.push(state, action, nextState, reward)
+
+        # Move to the next state
+        state = nextState
+
+        # Perform one step of the optimization (on the policy network)
+        optimizeModel()
+
+        # Soft update of the target network's weights
+        # θ′ ← τ θ + (1 −τ )θ′
+        targetNetStateDict = targetNet.state_dict()
+        policyNetStateDict = policyNet.state_dict()
+        for key in policyNetStateDict:
+            targetNetStateDict[key] = policyNetStateDict[key]*TAU + targetNetStateDict[key]*(1-TAU)
+        targetNet.load_state_dict(targetNetStateDict)
+
+        if done:
+            episodeDurations.append(t + 1)
+            plotDurations(episodeDurations)
+            break
+
+print('Complete')
+plotDurations(episodeDurations, show_result=True)
+plt.show()
