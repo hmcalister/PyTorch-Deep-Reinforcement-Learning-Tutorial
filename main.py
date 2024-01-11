@@ -30,6 +30,11 @@ policyNet = DQN(numObservations, numActions).to(device)
 targetNet = DQN(numObservations, numActions).to(device)
 targetNet.load_state_dict(policyNet.state_dict())
 
+optimizer = optim.AdamW(policyNet.parameters(), lr=LR, amsgrad=True)
+
+memory = ReplayMemory(10000)
+steps = 0
+episodeDurations = []
     else:
 
 X = torch.rand(10, device=device)
