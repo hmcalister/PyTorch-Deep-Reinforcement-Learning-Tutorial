@@ -1,15 +1,20 @@
+import gymnasium as gym
+import math
+import random
+import matplotlib.pyplot as plt
+from itertools import count
+
+from transitions import Transition, ReplayMemory
+from DeepQNetwork import DQN
+from display import plotDurations
+
 import torch
+import torch.nn as nn
+import torch.optim as optim
 
+env = gym.make("CartPole-v1")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(f"Using device: {device}")
 
-def checkGPUMemory():
-    if device.type == "cuda":
-        print(torch.cuda.get_device_name(0))
-        print("Memory Usage:")
-        print(f"Allocated: {torch.cuda.memory_allocated(0)}")
-        print(f"Cached:   {torch.cuda.memory_reserved(0)}")
-        print()
     else:
         print("Device is not set to cuda")
 
