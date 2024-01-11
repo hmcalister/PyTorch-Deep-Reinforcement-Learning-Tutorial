@@ -22,6 +22,26 @@ env = gym.make("CartPole-v1")
 # I was pleasantly surprised by how easy it was to set up CUDA and the GPU with pytorch!
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+# Our goal is to train a policy (a mapping from current state to actions in that state, with some way to weight preferences of those actions)
+# that maximizes a reward R_{t_0} = \sum_{t=t_0}^{\inf} \gamma^{t-t_0} r_t, i.e. the sum of discounted rewards. In effect,
+# this calculation measures how much reward we expect from our *current* action, as well as how much reward we expect from the *next* action 
+# based on what we did. In this way, by changing \gamma we can affect how much the policy optimizes for short-term greedy strategies compared to 
+# long-term planning.
+#
+# Q-learning achieves this by modeling an ideal function Q*, mapping from the space of State x Action to a real number indicating the preference for that action
+# (exactly as we discussed above). We then build a function Q (our model) that tries to emulate that ideal Q*. Of course, we do not *know* Q*, or
+# we would not have to learn it, but we can construct an environment such that certain actions in certain states give more or less rewards to the model.
+#
+# Since our environment (the cart-pole) is deterministic, we can have our policy follow the Bellman equation Q^\pi(s,a) = r+\gamma Q^\pi(s", \pi(s")),
+# i.e. our function Q^\pi predicts a preference for action a in state s determined by the reward r, and the Q^\pi (our preference) 
+# for the MOST preferred action in the next state.
+# Taking the difference of these sides gives up a temporal difference error \delta = Q^\pi(s,a) - (r+\gamma max_a (s", a)), note we replace
+# our most preferred action Q^\pi(s", \pi(s") with a simple maximum over the actions in the state s".
+#
+# We want to minimize this temporal difference error, which we will do using the Huber loss. Other losses (e.g. MSE, MAE, etc.) would also work,
+# but the Huber loss tends to smooth outliers when Q is very noisy (like at the beginning of training). Also, the tutorial is using Huber loss,
+# so we will too! The Huber loss is given by L = (1/|B|) \sum_{(s, a, s", a") \in B} L(\delta), where
+# L(\delta) = (1/2)\delta^2 for |\delta|<=1, and |delta|-(1/2) otherwise.
 BATCH_SIZE = 128
 GAMMA = 0.99
 EPS_START = 0.9
