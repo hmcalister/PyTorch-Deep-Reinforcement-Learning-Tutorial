@@ -55,6 +55,52 @@ def selectAction(state):
         return torch.tensor([[env.action_space.sample()]], device=device, dtype=torch.long)
     
 
+def optimizeModel():
+    if len(memory) < BATCH_SIZE:
+        return
+    transitions = memory.sample(BATCH_SIZE)
 
-X = torch.rand(1000000, device=device)
-checkGPUMemory()
+    # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
+    # detailed explanation). This converts batch-array of Transitions
+    # to Transition of batch-arrays.
+    batch = Transition(*zip(*transitions))
+
+    # Compute a mask of non-final states and concatenate the batch elements
+    # (a final state would've been the one after which simulation ended)
+    # This is just a big list of booleans, true if the state we sampled has a next state, false otherwise
+    nonfinalMask = torch.tensor(tuple(map(lambda s: s is not None, batch.nextState)), device=device, dtype=torch.bool)
+    # and this is a big list of those states that have next states
+    nonfinalNextStates = torch.cat([s for s in batch.nextState if s is not None])
+
+    stateBatch = torch.cat(batch.state)
+    actionBatch = torch.cat(batch.action)
+    rewardBatch = torch.cat(batch.reward)
+
+    # Compute Q(s_t, a) - the model computes Q(s_t), then we select the
+    # columns of actions taken. These are the actions which would've been taken
+    # for each batch state according to policyNet
+    stateActionValues = policyNet(stateBatch).gather(1, actionBatch)
+
+    # Compute V(s_{t+1}) for all next states.
+    # Expected values of actions for nonfinalNextStates are computed based
+    # on the "older" targetNet; selecting their best reward with max(1).values
+    # This is merged based on the mask, such that we'll have either the expected
+    # state value or 0 in case the state was final.
+    nextStateValues = torch.zeros(BATCH_SIZE, device=device)
+    with torch.no_grad():
+        nextStateValues[nonfinalMask] = targetNet(nonfinalNextStates).max(1).values
+
+    # Compute the expected Q values - the targetNets estimate plus the reward of the sample
+    expectedStateActionValues = (nextStateValues * GAMMA) + rewardBatch
+
+    # Compute Huber loss
+    criterion = nn.SmoothL1Loss()
+    loss = criterion(stateActionValues, expectedStateActionValues.unsqueeze(1))
+
+    # Optimize the model
+    optimizer.zero_grad()
+    loss.backward()
+    # In-place gradient clipping
+    torch.nn.utils.clip_grad_value_(policyNet.parameters(), 100)
+    optimizer.step()
+
