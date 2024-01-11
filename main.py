@@ -42,12 +42,25 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 # but the Huber loss tends to smooth outliers when Q is very noisy (like at the beginning of training). Also, the tutorial is using Huber loss,
 # so we will too! The Huber loss is given by L = (1/|B|) \sum_{(s, a, s", a") \in B} L(\delta), where
 # L(\delta) = (1/2)\delta^2 for |\delta|<=1, and |delta|-(1/2) otherwise.
+
+# Define some hyperparameters for the training.
+#
+# Note that epsilon, mentioned below, refers to the probability that we choose an action randomly (uniformly)
+# rather than using the model we are learning. This helps in the exploration vs exploitation tradeoff.
+
+# Number of transitions to sample from the replay buffer
 BATCH_SIZE = 128
+# Discount factor on reward. Higher numbers (close to 1) indicate a preference for long-term planning over greedy strategies
 GAMMA = 0.99
+# Starting  value of epsilon
 EPS_START = 0.9
+# Ending value of epsilon
 EPS_END = 0.05
+# Exponential decay rate of epsilon, with a higher number meaning slower decay
 EPS_DECAY = 1000
+# Update rate of the network
 TAU = 0.005
+# Learning rate of the ADAM optimizers
 LR = 1e-4
 
 numActions = env.action_space.n
