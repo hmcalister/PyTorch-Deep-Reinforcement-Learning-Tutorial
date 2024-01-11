@@ -63,7 +63,10 @@ TAU = 0.005
 # Learning rate of the ADAM optimizers
 LR = 1e-4
 
+# The number of actions possible in our environment
 numActions = env.action_space.n
+
+# The state and information of the environment as we start
 state, info = env.reset()
 numObservations = len(state)
 policyNet = DQN(numObservations, numActions).to(device)
