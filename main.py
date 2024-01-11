@@ -17,6 +17,9 @@ import torch.optim as optim
 
 # Make the CartPole environment from gymnasium
 env = gym.make("CartPole-v1")
+
+# Ensure we are using a GPU if it is available.
+# I was pleasantly surprised by how easy it was to set up CUDA and the GPU with pytorch!
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 BATCH_SIZE = 128
