@@ -8,10 +8,14 @@ from transitions import Transition, ReplayMemory
 from DeepQNetwork import DQN
 from display import plotDurations
 
+# Base PyTorch package
 import torch
+# All of the Neural Network stuff within PyTorch, similar to Keras for tensorflow?
 import torch.nn as nn
+# PyTorch built in optimization algorithms, such as ADAM
 import torch.optim as optim
 
+# Make the CartPole environment from gymnasium
 env = gym.make("CartPole-v1")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
