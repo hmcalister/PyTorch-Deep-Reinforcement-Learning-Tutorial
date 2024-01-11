@@ -98,7 +98,9 @@ def selectAction(state):
     eps_threshold = EPS_END + (EPS_START - EPS_END) * math.exp(-1. * steps / EPS_DECAY)
     steps += 1
     
+    # If we rolled a number above the epsilon threshold, do what is determined by our learned model
     if sample > eps_threshold:
+        # Note we do not want this to impact our training with backprop so we ignore the gradient
         with torch.no_grad():
             # t.max(1) will return the largest column value of each row.
             # second column on max result is index of where max element was
