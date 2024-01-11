@@ -23,6 +23,9 @@ EPS_DECAY = 1000
 TAU = 0.005
 LR = 1e-4
 
+numActions = env.action_space.n
+state, info = env.reset()
+numObservations = len(state)
     else:
 
 X = torch.rand(10, device=device)
