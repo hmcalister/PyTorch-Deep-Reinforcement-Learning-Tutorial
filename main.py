@@ -112,8 +112,11 @@ def selectAction(state):
     
 
 def optimizeModel():
+    # If we do not have enough transitions to sample yet, just don't do anything
     if len(memory) < BATCH_SIZE:
         return
+    
+    # We have enough transitions to sample, so let's get a set of random transitions
     transitions = memory.sample(BATCH_SIZE)
 
     # Transpose the batch (see https://stackoverflow.com/a/19343/3343043 for
